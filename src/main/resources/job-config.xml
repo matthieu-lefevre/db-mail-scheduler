@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans schema/spring-beans-4.0.xsd
+            http://www.springframework.org/schema/batch schema/spring-batch-3.0.xsd
+            http://www.springframework.org/schema/task schema/spring-task-4.0.xsd">
+
+    <import resource="classpath*:spring-context.xml" />
+
+
+    <bean id="mailTasklet" class="com.mlefevre.scheduler.batch.MailTasklet">
+        <property name="configuration">
+            <bean class="freemarker.template.Configuration" />
+        </property>
+    </bean>
+
+    <batch:job id="mailJob">
+        <batch:step id="mailStep">
+            <batch:tasklet ref="mailTasklet" />
+        </batch:step>
+    </batch:job>
+
+
+    <bean id="mailScheduler" class="com.mlefevre.scheduler.batch.MailScheduler">
+        <property name="job" ref="mailJob" />
+        <property name="jobLauncher" ref="jobLauncher" />
+    </bean>
+
+    <task:scheduled-tasks>
+        <!--<task:scheduled ref="" method="" cron="${scheduler.cron}" />-->
+        <task:scheduled ref="mailScheduler" method="run" fixed-delay="${scheduler.delay}" />
+    </task:scheduled-tasks>
+
+</beans>
